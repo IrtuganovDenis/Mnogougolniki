@@ -1,4 +1,4 @@
-﻿using Avalonia.Controls;
+using Avalonia.Controls;
 using Avalonia.Media;
 using Avalonia;
 using System;
@@ -7,6 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Avalonia.Controls.Shapes;
+using System.Security.Cryptography;
 
 namespace Mnogougolniki
 {
@@ -15,7 +16,8 @@ namespace Mnogougolniki
         private List<Shape> shapes = [
             new Circle(400, 400),
             new Square(300, 700),
-            new Circle(200, 500)
+            new Triangle(200, 450),
+            new Square(600, 500)
             ];
 
         double prx, pry;
@@ -54,7 +56,8 @@ namespace Mnogougolniki
             {
                 shapes.Add(new Circle(X, Y));
                 shapes.Last().InHull = false;
-                CreateHull();
+                //CreateHullZavriev();
+                CreateHullJarvis();
                 Console.WriteLine(1);
                 
                 if (shapes.Last().InHull != true)
@@ -100,7 +103,8 @@ namespace Mnogougolniki
                 }
                 //shape.InHull = false;
             }
-            CreateHull();
+            //CreateHullZavriev();
+            CreateHullJarvis();
             foreach (Shape s in shapes.ToList())
             {
                 if (!s.InHull)
@@ -111,7 +115,7 @@ namespace Mnogougolniki
             InvalidateVisual();
         }
 
-        public void CreateHull()
+        public void CreateHullZavriev()
         {
             foreach (Shape s in shapes)
             {
@@ -193,17 +197,31 @@ namespace Mnogougolniki
             double b = Point.Distance(p1, p3);
             double c = Point.Distance(p2, p3);
 
-            return (a * a + c * c - b * b) / 2 * a * c;
+            return (a * a + c * c - b * b) / (2 * a * c);
         }
-        public void DrawJarvis(DrawingContext drawingContext)
+
+        private void toHull(Shape sh)
+        {
+            foreach (Shape s in shapes)
+            {
+                if (s == sh)
+                {
+                    s.InHull = true;
+                }
+            }
+        }
+
+        public void CreateHullJarvis()
         {
             foreach (Shape s in shapes)
             {
                 s.InHull = false;
             }
-            Pen p = new Pen(new SolidColorBrush(Colors.Black), 1, lineCap: PenLineCap.Square);
+
+            Pen pen = new Pen(new SolidColorBrush(Colors.Black), 1, lineCap: PenLineCap.Square);
 
             Shape frst = shapes[0];
+
             foreach (Shape s in shapes)
             {
                 if (s.X < frst.X || (frst.X == s.X && s.Y < frst.Y))
@@ -211,132 +229,115 @@ namespace Mnogougolniki
                     frst = s;
                 }
             }
-            foreach (Shape s in shapes)
-            {
-                if (s == frst)
-                {
-                    s.InHull = true;
-                }
-            }
-            Shape sec = new Circle(frst.X - 0.01, frst.Y);
-            Shape last = sec;
 
-            double maxcos = -int.MaxValue;
+            toHull(frst);
+            Shape sec = new Circle(frst.X, frst.Y - 1);
+            Shape last = null;
+            double maxcos = -2;
+
             foreach (Shape s in shapes)
             {
-                if (s == frst || s == sec)
-                {
-                    continue;
-                }
-                if (getCos(frst, sec, s) > maxcos)
+                if (s == frst || s == sec) continue;
+                var a = getCos(frst, sec, s);
+                if (a > maxcos)
                 {
                     last = s;
-                    maxcos = getCos(frst, sec, s);
+                    maxcos = a;
                 }
             }
-            foreach (Shape s in shapes)
-            {
-                if (s == last)
-                {
-                    s.InHull = true;
-                }
-            }
+
             sec = last;
-            drawingContext.DrawLine(p, new Point(frst.X, frst.Y), new Point(sec.X, sec.Y));
-            
-            
+            toHull(last);
+            Shape start = frst;
+
             while (true)
             {
-                double mincos = int.MaxValue;
-                Shape shape = null;
+                double mincos = 2;
                 foreach (Shape s in shapes)
                 {
-                   
+                    if (s == start || s == sec) continue;
+                    var a = getCos(start, sec, s);
+                    if (mincos > a)
+                    {
+                        last = s;
+                        mincos = a;
+                    }
                 }
+
+                start = sec;
+                sec = last;
+                toHull(last);
+
+                if (last == frst) break;
             }
         }
 
-
-
-        private void DrawConvexHullJarvis(DrawingContext context)
+        public void DrawHullJarvis(DrawingContext drawingContext)
         {
-            foreach (var shape in _shapes)
+            foreach (Shape s in shapes)
             {
-                shape.IsInConvexHull = false;
+                s.InHull = false;
             }
 
-            Brush lineBrush = new SolidColorBrush(Colors.Fuchsia);
-            Pen pen = new(lineBrush, lineCap: PenLineCap.Square);
-            double minX = Int32.MaxValue;
-            double minY = Int32.MinValue;
-            Shape first = new Circle(0, 0);
-            foreach (var s in _shapes)
+            Pen pen = new Pen(new SolidColorBrush(Colors.Black), 1, lineCap: PenLineCap.Square);
+
+            Shape frst = shapes[0];
+
+            foreach (Shape s in shapes)
             {
-                if (s.Y > minY)
+                if (s.X < frst.X || (frst.X == s.X && s.Y < frst.Y))
                 {
-                    minY = s.Y;
-                    minX = s.X;
-                    first = s;
-                }
-                else if (Math.Abs(s.Y - minY) < 1e-4)
-                {
-                    if (s.X < minX)
-                    {
-                        minY = s.Y;
-                        minX = s.X;
-                        first = s;
-                    }
+                    frst = s;
                 }
             }
 
-            _shapes.Find(s => s == first)!.IsInConvexHull = true;
-            Shape mid = new Circle(first.X - 0.1, first.Y);
-            Shape end = mid;
-            double maxCos = -2;
-            foreach (var s in _shapes)
+            toHull(frst);
+            Shape sec = new Circle(frst.X, frst.Y - 1);
+            Shape last = null;
+            double maxcos = -2;
+
+            foreach (Shape s in shapes)
             {
-                if (s == mid || s == first) continue;
-                if (maxCos < GetCos(first, mid, s))
+                if (s == frst || s == sec) continue;
+                var a = getCos(frst, sec, s);
+                if (a > maxcos)
                 {
-                    end = s;
-                    maxCos = GetCos(first, mid, s);
+                    last = s;
+                    maxcos = a;
                 }
             }
 
-            mid = end;
-            _shapes.Find(i => i == end)!.IsInConvexHull = true;
-            var p1 = new Point(first.X, first.Y);
-            var p2 = new Point(mid.X, mid.Y);
-            context.DrawLine(pen, p1, p2);
-            var start = first;
+            sec = last;
+            toHull(last);
+            drawingContext.DrawLine(pen, new Point(frst.X, frst.Y), new Point(sec.X, sec.Y));
+            Shape start = frst;
+
             while (true)
             {
-                double minCos = 2;
-                foreach (var s in _shapes)
+                double mincos = 2;
+                foreach (Shape s in shapes)
                 {
-                    if (s == start || s == mid) continue;
-                    if (minCos > GetCos(start, mid, s))
+                    if (s == start || s == sec) continue;
+                    var a = getCos(start, sec, s);
+                    if (mincos > a)
                     {
-                        end = s;
-                        minCos = GetCos(start, mid, s);
+                        last = s;
+                        mincos = a;
                     }
                 }
 
-                start = mid;
-                mid = end;
-                _shapes.Find(i => i == end)!.IsInConvexHull = true;
-                p1 = new Point(start.X, start.Y);
-                p2 = new Point(mid.X, mid.Y);
-                context.DrawLine(pen, p1, p2);
-                if (end == first)
-                {
-                    break;
-                }
+                start = sec;
+                sec = last;
+                toHull(last);
+                drawingContext.DrawLine(pen, new Point(start.X, start.Y), new Point(sec.X, sec.Y));
+                
+                if (last == frst) break;
             }
         }
-
-
-        public void DrawHull(DrawingContext drawingContext)
+        
+        
+        
+        public void DrawHullZavriev(DrawingContext drawingContext)
         {
             int i = 0;
             foreach (Shape s1 in shapes)
@@ -427,7 +428,8 @@ namespace Mnogougolniki
 
             if (shapes.Count() >= 3)
             {
-                DrawHull(drawingContext);
+                //DrawHullZavriev(drawingContext);
+                DrawHullJarvis(drawingContext);
             }
         }
     }
