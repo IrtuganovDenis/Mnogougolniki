@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.9.34728.123
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Mnogougolniki", "Mnogougolniki\Mnogougolniki.csproj", "{6976AAC6-55FE-43E4-AB3E-04D32EFC4877}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Mnogougolniki.Desktop", "Mnogougolniki.Desktop\Mnogougolniki.Desktop.csproj", "{93F53F60-A2AD-48A6-817E-CDFB75340538}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{6976AAC6-55FE-43E4-AB3E-04D32EFC4877}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6976AAC6-55FE-43E4-AB3E-04D32EFC4877}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6976AAC6-55FE-43E4-AB3E-04D32EFC4877}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6976AAC6-55FE-43E4-AB3E-04D32EFC4877}.Release|Any CPU.Build.0 = Release|Any CPU
+		{93F53F60-A2AD-48A6-817E-CDFB75340538}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{93F53F60-A2AD-48A6-817E-CDFB75340538}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{93F53F60-A2AD-48A6-817E-CDFB75340538}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{93F53F60-A2AD-48A6-817E-CDFB75340538}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {592EDC7F-AD2C-4BC4-9DA7-FF87ADBDC225}
+	EndGlobalSection
+EndGlobal
